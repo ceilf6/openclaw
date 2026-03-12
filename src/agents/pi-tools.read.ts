@@ -1,4 +1,4 @@
-import fs from "node:fs/promises";
+import fs from "node:fs/promises"; // // 直接通过 NodeJS fs API 没封装 MCP
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import type { AgentToolResult } from "@mariozechner/pi-agent-core";
@@ -806,7 +806,7 @@ function createHostEditOperations(root: string, options?: { workspaceOnly?: bool
           rootDir: root,
           relativePath: relative,
         });
-        await opened.handle.close().catch(() => {});
+        await opened.handle.close().catch(() => { });
       } catch (error) {
         if (error instanceof SafeOpenError && error.code === "not-found") {
           throw createFsAccessError("ENOENT", absolutePath);
