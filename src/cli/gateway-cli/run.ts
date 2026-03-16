@@ -157,6 +157,7 @@ function resolveGatewayRunOptions(opts: GatewayRunOpts, command?: Command): Gate
   return resolved;
 }
 
+// 启动与总装配
 async function runGatewayCommand(opts: GatewayRunOpts) {
   const isDevProfile = process.env.OPENCLAW_PROFILE?.trim().toLowerCase() === "dev";
   const devMode = Boolean(opts.dev) || isDevProfile;
@@ -212,10 +213,10 @@ async function runGatewayCommand(opts: GatewayRunOpts) {
   const bindRaw = toOptionString(opts.bind) ?? cfg.gateway?.bind ?? "loopback";
   const bind =
     bindRaw === "loopback" ||
-    bindRaw === "lan" ||
-    bindRaw === "auto" ||
-    bindRaw === "custom" ||
-    bindRaw === "tailnet"
+      bindRaw === "lan" ||
+      bindRaw === "auto" ||
+      bindRaw === "custom" ||
+      bindRaw === "tailnet"
       ? bindRaw
       : null;
   if (!bind) {
@@ -333,11 +334,12 @@ async function runGatewayCommand(opts: GatewayRunOpts) {
   const authOverride =
     authMode || passwordRaw || tokenRaw || authModeRaw
       ? {
-          ...(authMode ? { mode: authMode } : {}),
-          ...(tokenRaw ? { token: tokenRaw } : {}),
-          ...(passwordRaw ? { password: passwordRaw } : {}),
-        }
+        ...(authMode ? { mode: authMode } : {}),
+        ...(tokenRaw ? { token: tokenRaw } : {}),
+        ...(passwordRaw ? { password: passwordRaw } : {}),
+      }
       : undefined;
+  // 统一格式
   const resolvedAuth = resolveGatewayAuth({
     authConfig: cfg.gateway?.auth,
     authOverride,
@@ -398,6 +400,7 @@ async function runGatewayCommand(opts: GatewayRunOpts) {
     !canBootstrapToken &&
     resolvedAuthMode !== "trusted-proxy"
   ) {
+    // 安全兜底
     defaultRuntime.error(
       [
         `Refusing to bind gateway to ${bind} without auth.`,
@@ -413,9 +416,9 @@ async function runGatewayCommand(opts: GatewayRunOpts) {
   const tailscaleOverride =
     tailscaleMode || opts.tailscaleResetOnExit
       ? {
-          ...(tailscaleMode ? { mode: tailscaleMode } : {}),
-          ...(opts.tailscaleResetOnExit ? { resetOnExit: true } : {}),
-        }
+        ...(tailscaleMode ? { mode: tailscaleMode } : {}),
+        ...(opts.tailscaleResetOnExit ? { resetOnExit: true } : {}),
+      }
       : undefined;
 
   try {
@@ -423,6 +426,7 @@ async function runGatewayCommand(opts: GatewayRunOpts) {
       runtime: defaultRuntime,
       lockPort: port,
       start: async () =>
+        // 启动服务
         await startGatewayServer(port, {
           bind,
           auth: authOverride,

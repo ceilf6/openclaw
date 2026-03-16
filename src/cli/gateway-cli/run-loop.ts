@@ -25,6 +25,7 @@ const gatewayLog = createSubsystemLogger("gateway");
 
 type GatewayRunSignalAction = "stop" | "restart";
 
+// 生命周期
 export async function runGatewayLoop(params: {
   start: () => Promise<Awaited<ReturnType<typeof startGatewayServer>>>;
   runtime: typeof defaultRuntime;
@@ -238,7 +239,7 @@ export async function runGatewayLoop(params: {
         const errStack = err instanceof Error && err.stack ? `\n${err.stack}` : "";
         gatewayLog.error(
           `gateway startup failed: ${errMsg}. ` +
-            `Process will stay alive; fix the issue and restart.${errStack}`,
+          `Process will stay alive; fix the issue and restart.${errStack}`,
         );
       }
       await new Promise<void>((resolve) => {

@@ -375,6 +375,7 @@ function shouldAllowTailscaleHeaderAuth(authSurface: GatewayAuthSurface): boolea
   return authSurface === "ws-control-ui";
 }
 
+// 鉴权判断
 export async function authorizeGatewayConnect(
   params: AuthorizeGatewayConnectParams,
 ): Promise<GatewayAuthResult> {
