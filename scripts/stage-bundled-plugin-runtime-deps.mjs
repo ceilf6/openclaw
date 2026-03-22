@@ -35,23 +35,49 @@ function shouldStageRuntimeDeps(packageJson) {
   return packageJson.openclaw?.bundle?.stageRuntimeDependencies === true;
 }
 
+function sleep(ms) {
+  Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
+}
+
 function installPluginRuntimeDeps(pluginDir, pluginId) {
-  const result = spawnSync(
-    "npm",
-    ["install", "--omit=dev", "--silent", "--ignore-scripts", "--package-lock=false"],
-    {
-      cwd: pluginDir,
-      encoding: "utf8",
-      stdio: "pipe",
-      shell: process.platform === "win32",
-    },
-  );
-  if (result.status === 0) {
-    return;
+  let lastOutput = "";
+
+  for (let attempt = 1; attempt <= 5; attempt++) {
+    console.log(`[runtime-postbuild] staging deps for ${pluginId} (attempt ${attempt}/5)`);
+
+    const result = spawnSync(
+      "npm",
+      ["install", "--omit=dev", "--ignore-scripts", "--package-lock=false"],
+      {
+        cwd: pluginDir,
+        encoding: "utf8",
+        stdio: "pipe",
+        shell: process.platform === "win32",
+        env: {
+          ...process.env,
+          npm_config_strict_ssl: process.env.npm_config_strict_ssl ?? "false",
+        },
+      },
+    );
+
+    if (result.status === 0) {
+      console.log(`[runtime-postbuild] staged deps for ${pluginId}`);
+      return;
+    }
+
+    lastOutput = [result.stderr, result.stdout].filter(Boolean).join("\n").trim();
+    console.error(`[runtime-postbuild] ${pluginId} failed on attempt ${attempt}/5`);
+    if (lastOutput) {
+      console.error(lastOutput);
+    }
+
+    if (attempt < 5) {
+      sleep(5000);
+    }
   }
-  const output = [result.stderr, result.stdout].filter(Boolean).join("\n").trim();
+
   throw new Error(
-    `failed to stage bundled runtime deps for ${pluginId}: ${output || "npm install failed"}`,
+    `failed to stage bundled runtime deps for ${pluginId}: ${lastOutput || "npm install failed"}`,
   );
 }
 
