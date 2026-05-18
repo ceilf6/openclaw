@@ -7,8 +7,10 @@ packages:
 minimumReleaseAge: 2880
 
 minimumReleaseAgeExclude:
+  - '@earendil-works/*'
   - "@openclaw/fs-safe@0.2.4"
-  - "@openclaw/proxyline@0.3.0"
+  - "@openclaw/proxyline@0.3.2"
+  - "@openclaw/*"
   - "acpx"
   - "tokenjuice"
   - "@agentclientprotocol/sdk"
